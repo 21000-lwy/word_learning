@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>开始学习 - 背单词系统</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Noto Sans SC', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            overflow-x: hidden;
+        }
+        
+        /* 二次元背景装饰 */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                radial-gradient(circle at 20% 80%, rgba(255, 182, 193, 0.3) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(173, 216, 230, 0.3) 0%, transparent 50%),
+                radial-gradient(circle at 40% 40%, rgba(221, 160, 221, 0.2) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: -1;
+        }
+        
+        .header {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            color: white;
+            padding: 20px 0;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+        }
+        
+        .nav-links {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+        }
+        
+        .nav-links a {
+            color: white;
+            text-decoration: none;
+            padding: 8px 16px;
+            border-radius: 5px;
+            transition: background 0.3s;
+        }
+        
+        .nav-links a:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+        
+        .main-content {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 20px;
+        }
+        
+        .study-container {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            max-width: 600px;
+            width: 100%;
+            text-align: center;
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #f0f0f0;
+            border-radius: 4px;
+            margin-bottom: 30px;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #74b9ff, #0984e3);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+        
+        .question-container {
+            margin-bottom: 30px;
+            display: none;
+        }
+        
+        .question-text {
+            font-size: 32px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 20px;
+            min-height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .question-type {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 20px;
+        }
+        
+        .options-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+        
+        .option-btn {
+            padding: 15px 20px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            background: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 16px;
+            color: #333;
+        }
+        
+        .option-btn:hover {
+            border-color: #74b9ff;
+            background: #f8f9ff;
+        }
+        
+        .option-btn.selected {
+            border-color: #74b9ff;
+            background: #74b9ff;
+            color: white;
+        }
+        
+        .option-btn.correct {
+            border-color: #00b894;
+            background: #00b894;
+            color: white;
+        }
+        
+        .option-btn.wrong {
+            border-color: #e17055;
+            background: #e17055;
+            color: white;
+        }
+        
+        .submit-btn {
+            background: linear-gradient(135deg, #74b9ff 0%, #0984e3 100%);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            border-radius: 10px;
+            font-size: 18px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(116, 185, 255, 0.3);
+            margin-right: 15px;
+        }
+        
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(116, 185, 255, 0.4);
+        }
+        
+        .submit-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .next-btn {
+            background: linear-gradient(135deg, #00b894 0%, #00a085 100%);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            border-radius: 10px;
+            font-size: 18px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 184, 148, 0.3);
+            display: none;
+        }
+        
+        .next-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 184, 148, 0.4);
+        }
+        
+        .result-container {
+            margin-top: 20px;
+            padding: 20px;
+            border-radius: 10px;
+            display: none;
+        }
+        
+        .result-correct {
+            background: #d1f2eb;
+            color: #00b894;
+            border: 1px solid #00b894;
+        }
+        
+        .result-wrong {
+            background: #ffeaa7;
+            color: #e17055;
+            border: 1px solid #e17055;
+        }
+        
+        .loading-container {
+            text-align: center;
+        }
+        
+        .loading-text {
+            font-size: 18px;
+            color: #666;
+            margin-bottom: 20px;
+        }
+        
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #74b9ff;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .stats-info {
+            background: #f8f9ff;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            text-align: center;
+        }
+        
+        .stat-item {
+            padding: 10px;
+        }
+        
+        .stat-number {
+            font-size: 24px;
+            font-weight: bold;
+            color: #74b9ff;
+        }
+        
+        .stat-label {
+            font-size: 12px;
+            color: #666;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="header-content">
+            <div class="logo">背单词系统 - 学习模式</div>
+            <div class="nav-links">
+                <span>欢迎，<span th:text="${username}"></span>！</span>
+                <a th:href="@{/dashboard}">返回首页</a>
+                <a th:href="@{/auth/logout}">退出登录</a>
+            </div>
+        </div>
+    </header>
+    
+    <main class="main-content">
+        <div class="study-container">
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+            
+            <div class="stats-info">
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <div class="stat-number" th:text="${stats.totalLearned}">0</div>
+                        <div class="stat-label">已学单词</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number" th:text="${stats.learning}">0</div>
+                        <div class="stat-label">学习中</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number" th:text="${stats.mastered}">0</div>
+                        <div class="stat-label">已掌握</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="loading-container" id="loadingContainer">
+                <div class="loading-text">正在加载题目...</div>
+                <div class="spinner"></div>
+            </div>
+            
+            <div class="question-container" id="questionContainer">
+                <div class="question-type" id="questionType"></div>
+                <div class="question-text" id="questionText"></div>
+                <div class="word-details" id="wordDetails" style="margin: 20px 0; padding: 15px; background: #f8f9ff; border-radius: 10px; text-align: left;">
+                    <div class="detail-item" id="pronunciationDetail" style="margin-bottom: 8px; color: #666;"></div>
+                    <div class="detail-item" id="exampleDetail" style="margin-bottom: 8px; color: #666;"></div>
+                    <div class="detail-item" id="difficultyDetail" style="color: #666;"></div>
+                </div>
+                <div class="options-container" id="optionsContainer"></div>
+                <div>
+                    <button class="submit-btn" id="submitBtn" onclick="submitAnswer()" disabled>提交答案</button>
+                    <button class="next-btn" id="nextBtn" onclick="nextQuestion()">下一题</button>
+                </div>
+                <div class="result-container" id="resultContainer"></div>
+            </div>
+        </div>
+    </main>
+    
+    <!-- 音频元素 -->
+    <audio id="correctSound" preload="auto">
+        <source src="/videos/1757490262386623_y758.wav" type="audio/wav">
+    </audio>
+    <audio id="wrongSound" preload="auto">
+        <source src="/videos/1757490401680104_486.wav" type="audio/wav">
+    </audio>
+    
+    <script>
+        let currentQuestion = null;
+        let selectedAnswer = null;
+        let questionCount = 0;
+        let correctCount = 0;
+        
+        // 页面加载时获取第一个题目
+        window.onload = function() {
+            loadNextQuestion();
+        };
+        
+        // 加载下一个题目
+        function loadNextQuestion() {
+            document.getElementById('loadingContainer').style.display = 'block';
+            document.getElementById('questionContainer').style.display = 'none';
+            document.getElementById('resultContainer').style.display = 'none';
+            document.getElementById('nextBtn').style.display = 'none';
+            document.getElementById('submitBtn').style.display = 'inline-block';
+            
+            fetch('/learning/api/next-question')
+                .then(response => {
+                    if (response.status === 204) {
+                        // 没有更多题目
+                        showNoMoreQuestions();
+                        return null;
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data) {
+                        currentQuestion = data;
+                        displayQuestion(data);
+                        document.getElementById('loadingContainer').style.display = 'none';
+                        document.getElementById('questionContainer').style.display = 'block';
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    document.getElementById('loadingContainer').innerHTML = '<div class="loading-text">加载失败，请刷新页面重试</div>';
+                });
+        }
+        
+        // 显示题目
+        function displayQuestion(question) {
+            document.getElementById('questionType').textContent = 
+                question.type === 'english_to_chinese' ? '请选择正确的中文意思：' : '请选择正确的英文单词：';
+            document.getElementById('questionText').textContent = question.question;
+            
+            // 显示单词详细信息
+            const pronunciationDetail = document.getElementById('pronunciationDetail');
+            const exampleDetail = document.getElementById('exampleDetail');
+            const difficultyDetail = document.getElementById('difficultyDetail');
+            
+            pronunciationDetail.innerHTML = question.pronunciation ? 
+                `<strong>发音：</strong>${question.pronunciation}` : '';
+            exampleDetail.innerHTML = question.example ? 
+                `<strong>例句：</strong>${question.example}` : '';
+            
+            const difficultyText = ['', '初级', '初中级', '中级', '中高级', '高级'][question.difficultyLevel || 1];
+            difficultyDetail.innerHTML = `<strong>难度：</strong>${difficultyText}`;
+            
+            const optionsContainer = document.getElementById('optionsContainer');
+            optionsContainer.innerHTML = '';
+            
+            question.options.forEach((option, index) => {
+                const button = document.createElement('button');
+                button.className = 'option-btn';
+                button.textContent = option;
+                button.onclick = () => selectOption(button, option);
+                optionsContainer.appendChild(button);
+            });
+            
+            selectedAnswer = null;
+            document.getElementById('submitBtn').disabled = true;
+        }
+        
+        // 选择选项
+        function selectOption(button, answer) {
+            // 清除之前的选择
+            document.querySelectorAll('.option-btn').forEach(btn => {
+                btn.classList.remove('selected');
+            });
+            
+            // 选中当前选项
+            button.classList.add('selected');
+            selectedAnswer = answer;
+            document.getElementById('submitBtn').disabled = false;
+        }
+        
+        // 提交答案
+        function submitAnswer() {
+            if (!selectedAnswer || !currentQuestion) return;
+            
+            const answerData = {
+                wordId: currentQuestion.wordId,
+                userAnswer: selectedAnswer,
+                correctAnswer: currentQuestion.correctAnswer
+            };
+            
+            fetch('/learning/api/submit-answer', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(answerData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                showResult(data);
+                updateProgress();
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        }
+        
+        // 显示结果
+        function showResult(result) {
+            const resultContainer = document.getElementById('resultContainer');
+            const submitBtn = document.getElementById('submitBtn');
+            const nextBtn = document.getElementById('nextBtn');
+            
+            // 禁用所有选项按钮
+            document.querySelectorAll('.option-btn').forEach(btn => {
+                btn.disabled = true;
+                if (btn.textContent === result.correctAnswer) {
+                    btn.classList.add('correct');
+                } else if (btn.textContent === result.userAnswer && !result.correct) {
+                    btn.classList.add('wrong');
+                }
+            });
+            
+            // 显示结果
+            resultContainer.style.display = 'block';
+            if (result.correct) {
+                resultContainer.className = 'result-container result-correct';
+                resultContainer.innerHTML = '<strong>回答正确！</strong><br>继续保持！';
+                playSound('correct');
+                correctCount++;
+            } else {
+                resultContainer.className = 'result-container result-wrong';
+                resultContainer.innerHTML = `<strong>回答错误！</strong><br>正确答案是：${result.correctAnswer}`;
+                playSound('wrong');
+            }
+            
+            // 隐藏提交按钮，显示下一题按钮
+            submitBtn.style.display = 'none';
+            nextBtn.style.display = 'inline-block';
+            
+            questionCount++;
+        }
+        
+        // 播放音效
+        function playSound(type) {
+            const audio = document.getElementById(type === 'correct' ? 'correctSound' : 'wrongSound');
+            if (audio) {
+                audio.currentTime = 0;
+                audio.play().catch(e => console.log('音频播放失败:', e));
+            }
+        }
+        
+        // 更新进度条
+        function updateProgress() {
+            const progress = questionCount > 0 ? (correctCount / questionCount) * 100 : 0;
+            document.getElementById('progressFill').style.width = progress + '%';
+        }
+        
+        // 下一题
+        function nextQuestion() {
+            // 重置选项按钮状态
+            document.querySelectorAll('.option-btn').forEach(btn => {
+                btn.disabled = false;
+                btn.classList.remove('selected', 'correct', 'wrong');
+            });
+            
+            loadNextQuestion();
+        }
+        
+        // 没有更多题目
+        function showNoMoreQuestions() {
+            document.getElementById('loadingContainer').innerHTML = 
+                '<div class="loading-text">恭喜！暂时没有更多题目了。<br><a href="/dashboard" style="color: #74b9ff;">返回首页</a></div>';
+        }
+    </script>
+</body>
+</html>

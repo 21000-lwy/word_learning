@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>注册 - 背单词系统</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Noto Sans SC', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        /* 二次元背景装饰 */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                radial-gradient(circle at 20% 80%, rgba(255, 182, 193, 0.3) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(173, 216, 230, 0.3) 0%, transparent 50%),
+                radial-gradient(circle at 40% 40%, rgba(221, 160, 221, 0.2) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: -1;
+        }
+        
+        /* 浮动装饰元素 */
+        .floating-elements {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+        }
+        
+        .floating-star {
+            position: absolute;
+            color: rgba(255, 255, 255, 0.6);
+            animation: float 6s ease-in-out infinite;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-20px) rotate(180deg); }
+        }
+        
+        .register-container {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(15px);
+            padding: 50px;
+            border-radius: 25px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 450px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .register-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #fd79a8, #fdcb6e, #a29bfe);
+        }
+        
+        .register-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        
+        .register-header h1 {
+            color: #fd79a8;
+            font-size: 2.2rem;
+            margin-bottom: 15px;
+            font-weight: 700;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        
+        .register-header .emoji {
+            font-size: 3rem;
+            margin-bottom: 15px;
+            display: block;
+            filter: drop-shadow(2px 2px 4px rgba(0, 0, 0, 0.1));
+        }
+        
+        .register-header p {
+            color: #666;
+            font-size: 1rem;
+            font-weight: 300;
+        }
+        
+        .form-group {
+            margin-bottom: 25px;
+            position: relative;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #555;
+            font-weight: 500;
+            font-size: 0.95rem;
+        }
+        
+        .form-group input {
+            width: 100%;
+            padding: 15px 20px;
+            border: 2px solid rgba(253, 121, 168, 0.2);
+            border-radius: 15px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(10px);
+        }
+        
+        .form-group input:focus {
+            outline: none;
+            border-color: #fd79a8;
+            box-shadow: 0 0 0 3px rgba(253, 121, 168, 0.1);
+            background: rgba(255, 255, 255, 0.95);
+        }
+        
+        .form-group input::placeholder {
+            color: #aaa;
+        }
+        
+        .register-btn {
+            width: 100%;
+            background: linear-gradient(135deg, #fd79a8, #fdcb6e);
+            color: white;
+            border: none;
+            padding: 15px;
+            border-radius: 15px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(253, 121, 168, 0.4);
+            margin-bottom: 20px;
+        }
+        
+        .register-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(253, 121, 168, 0.6);
+        }
+        
+        .register-btn:active {
+            transform: translateY(0);
+        }
+        
+        .login-link {
+            text-align: center;
+            margin-top: 25px;
+        }
+        
+        .login-link a {
+            color: #fd79a8;
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            padding: 10px 20px;
+            border-radius: 10px;
+            display: inline-block;
+        }
+        
+        .login-link a:hover {
+            background: rgba(253, 121, 168, 0.1);
+            transform: translateY(-1px);
+        }
+        
+        .error-message {
+            background: rgba(255, 107, 107, 0.1);
+            color: #e74c3c;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            border: 1px solid rgba(255, 107, 107, 0.2);
+            font-size: 0.9rem;
+            text-align: center;
+        }
+        
+        .success-message {
+            background: rgba(46, 204, 113, 0.1);
+            color: #27ae60;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            border: 1px solid rgba(46, 204, 113, 0.2);
+            font-size: 0.9rem;
+            text-align: center;
+        }
+        
+        /* 响应式设计 */
+        @media (max-width: 480px) {
+            .register-container {
+                padding: 30px 25px;
+                margin: 20px;
+            }
+            
+            .register-header h1 {
+                font-size: 1.8rem;
+            }
+        }
+        
+        /* 动画效果 */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .register-container {
+            animation: fadeInUp 0.6s ease-out;
+        }
+    </style>
+</head>
+<body>
+    <!-- 浮动装饰元素 -->
+    <div class="floating-elements">
+        <div class="floating-star" style="top: 15%; left: 15%; font-size: 18px;">🎀</div>
+        <div class="floating-star" style="top: 25%; right: 20%; font-size: 14px; animation-delay: -2s;">🌸</div>
+        <div class="floating-star" style="top: 65%; left: 10%; font-size: 16px; animation-delay: -4s;">💖</div>
+        <div class="floating-star" style="top: 75%; right: 15%; font-size: 20px; animation-delay: -1s;">✨</div>
+        <div class="floating-star" style="top: 45%; right: 30%; font-size: 12px; animation-delay: -3s;">🦄</div>
+    </div>
+
+    <div class="register-container">
+        <div class="register-header">
+            <span class="emoji">🎀</span>
+            <h1>加入我们</h1>
+            <p>创建您的背单词账户，开始精彩的学习旅程</p>
+        </div>
+        
+        <div th:if="${error}" class="error-message">
+            <span th:text="${error}">注册失败，请检查输入信息</span>
+        </div>
+        
+        <div th:if="${success}" class="success-message">
+            <span th:text="${success}">注册成功！请登录您的账户</span>
+        </div>
+        
+        <form th:action="@{/auth/register}" method="post">
+            <div class="form-group">
+                <label for="username">👤 用户名</label>
+                <input type="text" id="username" name="username" placeholder="请输入用户名（3-20个字符）" required minlength="3" maxlength="20">
+            </div>
+            
+            <div class="form-group">
+                <label for="email">📧 邮箱</label>
+                <input type="email" id="email" name="email" placeholder="请输入邮箱地址" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="password">🔒 密码</label>
+                <input type="password" id="password" name="password" placeholder="请输入密码（至少6位）" required minlength="6">
+            </div>
+            
+            <div class="form-group">
+                <label for="confirmPassword">🔐 确认密码</label>
+                <input type="password" id="confirmPassword" name="confirmPassword" placeholder="请再次输入密码" required>
+            </div>
+            
+            <button type="submit" class="register-btn">🌟 立即注册</button>
+        </form>
+        
+        <div class="login-link">
+            <p>已有账户？ <a th:href="@{/auth/login}">🚀 立即登录</a></p>
+        </div>
+    </div>
+    
+    <script>
+        // 密码确认验证
+        document.getElementById('confirmPassword').addEventListener('input', function() {
+            const password = document.getElementById('password').value;
+            const confirmPassword = this.value;
+            
+            if (password !== confirmPassword) {
+                this.setCustomValidity('密码不匹配');
+            } else {
+                this.setCustomValidity('');
+            }
+        });
+    </script>
+</body>
+</html>

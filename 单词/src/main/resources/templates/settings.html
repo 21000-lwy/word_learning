@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>个人设置 - 单词学习系统</title>
+    <style>
+        /* 复用现有样式并添加新样式 */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Microsoft YaHei', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .header {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .logo {
+            color: white;
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+
+        .container {
+            flex: 1;
+            padding: 2rem;
+            max-width: 800px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        .settings-header {
+            text-align: center;
+            color: white;
+            margin-bottom: 2rem;
+        }
+
+        .settings-card {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 2rem;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            margin-bottom: 2rem;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+
+        .settings-card h2 {
+            color: white;
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: white;
+            font-weight: 500;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: none;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            font-size: 1rem;
+        }
+
+        .form-input::placeholder {
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .alert {
+            padding: 1rem;
+            margin-bottom: 1rem;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .alert-success {
+            background: rgba(76, 175, 80, 0.2);
+            color: #4caf50;
+            border: 1px solid rgba(76, 175, 80, 0.3);
+        }
+
+        .alert-error {
+            background: rgba(244, 67, 54, 0.2);
+            color: #f44336;
+            border: 1px solid rgba(244, 67, 54, 0.3);
+        }
+
+        .form-buttons {
+            display: flex;
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 10px;
+            font-weight: bold;
+            cursor: pointer;
+            flex: 1;
+            transition: all 0.3s ease;
+            text-align: center;
+            text-decoration: none;
+        }
+
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #5a6fda;
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .user-info {
+            color: white;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .logout-btn {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        .logout-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+    </style>
+</head>
+<body>
+<header class="header">
+    <div class="logo">🌸 单词学习系统</div>
+    <div class="user-info">
+        <span th:text="${username}">用户名</span>
+        <a href="/auth/logout" class="logout-btn">退出登录</a>
+    </div>
+</header>
+
+<div class="container">
+    <div class="settings-header">
+        <h1>个人设置</h1>
+        <p>管理您的账户信息和偏好设置</p>
+    </div>
+
+    <!-- 消息提示 -->
+    <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
+    <div th:if="${error}" class="alert alert-error" th:text="${error}"></div>
+
+    <!-- 个人资料修改 -->
+    <div class="settings-card">
+        <h2>个人资料</h2>
+        <form th:action="@{/settings/update-profile}" method="post">
+            <div class="form-group">
+                <label for="newUsername" class="form-label">用户名</label>
+                <input type="text" id="newUsername" name="newUsername"
+                       class="form-input" th:value="${username}"
+                       placeholder="请输入新用户名" required>
+            </div>
+
+            <div class="form-group">
+                <label for="currentPassword" class="form-label">当前密码（验证身份）</label>
+                <input type="password" id="currentPassword" name="currentPassword"
+                       class="form-input" placeholder="请输入当前密码" required>
+            </div>
+
+            <div class="form-buttons">
+                <button type="submit" class="btn btn-primary">更新资料</button>
+                <a href="/dashboard" class="btn btn-secondary">取消</a>
+            </div>
+        </form>
+    </div>
+
+    <!-- 邮箱修改 -->
+    <div class="settings-card">
+        <h2>修改邮箱</h2>
+        <form th:action="@{/settings/update-email}" method="post">
+            <div class="form-group">
+                <label for="newEmail" class="form-label">新邮箱</label>
+                <input type="email" id="newEmail" name="newEmail"
+                       class="form-input" th:value="${userEmail}"
+                       placeholder="请输入新邮箱" required>
+            </div>
+
+            <div class="form-group">
+                <label for="emailPassword" class="form-label">当前密码（验证身份）</label>
+                <input type="password" id="emailPassword" name="currentPassword"
+                       class="form-input" placeholder="请输入当前密码" required>
+            </div>
+
+            <div class="form-buttons">
+                <button type="submit" class="btn btn-primary">更新邮箱</button>
+                <a href="/dashboard" class="btn btn-secondary">取消</a>
+            </div>
+        </form>
+    </div>
+
+    <!-- 密码修改（保留原功能） -->
+    <div class="settings-card">
+        <h2>修改密码</h2>
+        <form th:action="@{/settings/update-password}" method="post">
+            <div class="form-group">
+                <label for="passwordCurrent" class="form-label">当前密码</label>
+                <input type="password" id="passwordCurrent" name="currentPassword"
+                       class="form-input" placeholder="请输入当前密码" required>
+            </div>
+
+            <div class="form-group">
+                <label for="newPassword" class="form-label">新密码</label>
+                <input type="password" id="newPassword" name="newPassword"
+                       class="form-input" placeholder="请输入新密码（至少6位）" required minlength="6">
+            </div>
+
+            <div class="form-group">
+                <label for="confirmPassword" class="form-label">确认新密码</label>
+                <input type="password" id="confirmPassword" name="confirmPassword"
+                       class="form-input" placeholder="请再次输入新密码" required>
+            </div>
+
+            <div class="form-buttons">
+                <button type="submit" class="btn btn-primary">更新密码</button>
+                <a href="/dashboard" class="btn btn-secondary">取消</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    // 密码确认验证
+    document.getElementById('confirmPassword').addEventListener('input', function() {
+        const password = document.getElementById('newPassword').value;
+        const confirmPassword = this.value;
+
+        if (password !== confirmPassword) {
+            this.setCustomValidity('两次输入的密码不匹配');
+        } else {
+            this.setCustomValidity('');
+        }
+    });
+
+    // 邮箱格式验证
+    document.getElementById('newEmail').addEventListener('input', function() {
+        const email = this.value;
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+        if (!emailRegex.test(email)) {
+            this.setCustomValidity('请输入有效的邮箱地址');
+        } else {
+            this.setCustomValidity('');
+        }
+    });
+</script>
+</body>
+</html>
