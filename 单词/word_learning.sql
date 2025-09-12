@@ -14,6 +14,10 @@
  Date: 10/09/2025 20:55:05
 */
 
+CREATE DATABASE IF NOT EXISTS `word_learning` CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci;
+
+USE `word_learning`;
+
 SET NAMES utf8mb4;
 SET FOREIGN_KEY_CHECKS = 0;
 

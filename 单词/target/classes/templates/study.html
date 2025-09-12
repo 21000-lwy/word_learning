@@ -374,6 +374,7 @@
             document.getElementById('questionContainer').style.display = 'none';
             document.getElementById('resultContainer').style.display = 'none';
             document.getElementById('nextBtn').style.display = 'none';
+            document.getElementById('exampleDetail').style.display = 'none';
             document.getElementById('submitBtn').style.display = 'inline-block';
             
             fetch('/learning/api/next-question')
@@ -414,6 +415,7 @@
                 `<strong>发音：</strong>${question.pronunciation}` : '';
             exampleDetail.innerHTML = question.example ? 
                 `<strong>例句：</strong>${question.example}` : '';
+            exampleDetail.style.display = 'none';
             
             const difficultyText = ['', '初级', '初中级', '中级', '中高级', '高级'][question.difficultyLevel || 1];
             difficultyDetail.innerHTML = `<strong>难度：</strong>${difficultyText}`;
@@ -478,6 +480,11 @@
             const resultContainer = document.getElementById('resultContainer');
             const submitBtn = document.getElementById('submitBtn');
             const nextBtn = document.getElementById('nextBtn');
+
+            // 显示例句（如果存在）
+            if (currentQuestion.example) {
+                exampleDetail.style.display = 'block';
+            }
             
             // 禁用所有选项按钮
             document.querySelectorAll('.option-btn').forEach(btn => {

@@ -266,14 +266,14 @@
             <h1>📊 学习统计</h1>
             <p class="subtitle" th:text="'欢迎回来，' + ${username} + '！查看你的学习成果吧～'">欢迎回来！查看你的学习成果吧～</p>
         </div>
-        
+
         <div class="stats-grid">
             <div class="stat-card">
                 <span class="stat-icon">📚</span>
                 <div class="stat-number" th:text="${stats.totalWords}">0</div>
                 <div class="stat-label">总学习单词</div>
             </div>
-            
+
             <div class="stat-card">
                 <span class="stat-icon">✅</span>
                 <div class="stat-number" th:text="${stats.masteredWords}">0</div>
